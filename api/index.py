@@ -1,7 +1,8 @@
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from flask import Flask, request, jsonify, send_file
+from textblob import TextBlob
+import os
 
 app = Flask(__name__)
-# analyzer initialized lazily
 
 @app.route('/')
 def home():
@@ -22,17 +23,16 @@ def analyze():
         if not text:
             return jsonify({'error': 'No text provided'}), 400
 
-        # Perform VADER Analysis
-        analyzer = SentimentIntensityAnalyzer()
-        scores = analyzer.polarity_scores(text)
-        compound = scores['compound']
+        # Fallback to TextBlob for detailed breakdown
+        blob = TextBlob(text)
+        polarity = blob.sentiment.polarity
         
-        # Determine Vibe based on Compound Score
-        if compound >= 0.05:
+        # Determine Vibe
+        if polarity > 0.1:
             vibe = "Good Vibes"
             emoji = "🌊"
             color = "text-green-400"
-        elif compound <= -0.05:
+        elif polarity < -0.1:
             vibe = "Bad Vibes"
             emoji = "🥀"
             color = "text-red-400"
@@ -40,20 +40,37 @@ def analyze():
             vibe = "Neutral Vibes"
             emoji = "😐"
             color = "text-gray-400"
-            
+        
+        # Simulate VADER keys for frontend compatibility
+        # Pos/Neg/Neu are estimated from polarity
+        if polarity > 0:
+            pos = polarity * 100
+            neg = 0
+            neu = 100 - pos
+        elif polarity < 0:
+            neg = abs(polarity) * 100
+            pos = 0
+            neu = 100 - neg
+        else:
+            neu = 100
+            pos = 0
+            neg = 0
+
         return jsonify({
             'vibe': vibe,
             'emoji': emoji,
             'color': color,
-            'score': round(compound, 2),
+            'score': round(polarity, 2),
             'breakdown': {
-                'pos': round(scores['pos'] * 100, 1),
-                'neu': round(scores['neu'] * 100, 1),
-                'neg': round(scores['neg'] * 100, 1)
+                'pos': round(pos, 1),
+                'neu': round(neu, 1),
+                'neg': round(neg, 1)
             }
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'trace': traceback.format_exc()}), 500
 
 # Vercel WSGI entrypoint
 if __name__ == '__main__':
