@@ -1,0 +1,46 @@
+from flask import Flask, request, jsonify
+from textblob import TextBlob
+
+app = Flask(__name__)
+
+@app.route('/api/analyze', methods=['POST'])
+def analyze():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        text = data.get('text', '')
+        if not text:
+            return jsonify({'error': 'No text provided'}), 400
+
+        blob = TextBlob(text)
+        polarity = blob.sentiment.polarity
+        subjectivity = blob.sentiment.subjectivity
+        
+        if polarity > 0.1:
+            vibe = "Good Vibes"
+            emoji = "🌊"
+            color = "text-green-400"
+        elif polarity < -0.1:
+            vibe = "Bad Vibes"
+            emoji = "🥀"
+            color = "text-red-400"
+        else:
+            vibe = "Neutral Vibes"
+            emoji = "😐"
+            color = "text-gray-400"
+            
+        return jsonify({
+            'vibe': vibe,
+            'emoji': emoji,
+            'color': color,
+            'polarity': round(polarity, 2),
+            'subjectivity': round(subjectivity, 2)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Vercel WSGI entrypoint
+if __name__ == '__main__':
+    app.run()
