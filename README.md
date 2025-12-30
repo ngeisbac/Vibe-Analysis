@@ -1,14 +1,16 @@
-# Simple Sentiment Analyzer
+# Vibe Analysis 🌊
 
-A simple tool to analyze the sentiment of text using Python and TextBlob.
+A simple tool to analyze text sentiment using Python and TextBlob.
+
+[**✨ Live Demo**](https://vibe-analysis.vercel.app)
 
 ## Setup
 
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
+   pip install streamlit # Optional: for local Streamlit app
    ```
-
 
 ## Usage
 
@@ -23,4 +25,3 @@ A simple tool to analyze the sentiment of text using Python and TextBlob.
 ```bash
 python analyze.py "I love coding! It is so much fun."
 ```
-
