@@ -1,7 +1,7 @@
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 app = Flask(__name__)
-analyzer = SentimentIntensityAnalyzer()
+# analyzer initialized lazily
 
 @app.route('/')
 def home():
@@ -23,6 +23,7 @@ def analyze():
             return jsonify({'error': 'No text provided'}), 400
 
         # Perform VADER Analysis
+        analyzer = SentimentIntensityAnalyzer()
         scores = analyzer.polarity_scores(text)
         compound = scores['compound']
         
