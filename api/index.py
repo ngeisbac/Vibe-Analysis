@@ -1,7 +1,17 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from textblob import TextBlob
+import os
 
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    # Serve the static HTML file
+    try:
+        # Serve the static HTML file
+        return send_file(os.path.join(os.path.dirname(__file__), 'templates/index.html'))
+    except Exception as e:
+        return f"Error serving file: {str(e)}", 500
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
