@@ -1,14 +1,12 @@
-from flask import Flask, request, jsonify, send_file
-from textblob import TextBlob
-import os
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 app = Flask(__name__)
+analyzer = SentimentIntensityAnalyzer()
 
 @app.route('/')
 def home():
     # Serve the static HTML file
     try:
-        # Serve the static HTML file
         return send_file(os.path.join(os.path.dirname(__file__), 'templates/index.html'))
     except Exception as e:
         return f"Error serving file: {str(e)}", 500
@@ -24,15 +22,16 @@ def analyze():
         if not text:
             return jsonify({'error': 'No text provided'}), 400
 
-        blob = TextBlob(text)
-        polarity = blob.sentiment.polarity
-        subjectivity = blob.sentiment.subjectivity
+        # Perform VADER Analysis
+        scores = analyzer.polarity_scores(text)
+        compound = scores['compound']
         
-        if polarity > 0.1:
+        # Determine Vibe based on Compound Score
+        if compound >= 0.05:
             vibe = "Good Vibes"
             emoji = "🌊"
             color = "text-green-400"
-        elif polarity < -0.1:
+        elif compound <= -0.05:
             vibe = "Bad Vibes"
             emoji = "🥀"
             color = "text-red-400"
@@ -45,8 +44,12 @@ def analyze():
             'vibe': vibe,
             'emoji': emoji,
             'color': color,
-            'polarity': round(polarity, 2),
-            'subjectivity': round(subjectivity, 2)
+            'score': round(compound, 2),
+            'breakdown': {
+                'pos': round(scores['pos'] * 100, 1),
+                'neu': round(scores['neu'] * 100, 1),
+                'neg': round(scores['neg'] * 100, 1)
+            }
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500

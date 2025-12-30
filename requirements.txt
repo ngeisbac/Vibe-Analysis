@@ -1,2 +1,2 @@
 Flask
-textblob
+vaderSentiment

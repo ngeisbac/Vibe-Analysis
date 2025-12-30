@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,10 +30,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
         }
 
         .container {
@@ -70,7 +71,7 @@
             width: 100%;
             height: 150px;
             background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 1rem;
             color: white;
@@ -112,8 +113,9 @@
         .result-container {
             margin-top: 2rem;
             padding-top: 2rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: none; /* Hidden by default */
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+            /* Hidden by default */
             animation: fadeIn 0.5s ease;
         }
 
@@ -131,7 +133,7 @@
 
         .metric-card {
             flex: 1;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             padding: 1rem;
             border-radius: 12px;
             text-align: center;
@@ -151,83 +153,179 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Utility colors for JS */
-        .text-green-400 { color: #4ade80; }
-        .text-red-400 { color: #f87171; }
-        .text-gray-400 { color: #9ca3af; }
+        .text-green-400 {
+            color: #4ade80;
+        }
 
+        .text-red-400 {
+            color: #f87171;
+        }
+
+        .text-gray-400 {
+            color: #9ca3af;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <div class="glass-panel">
-        <h1>Vibe Analysis</h1>
-        <p class="subtitle">Enter text to detect the energy ✨</p>
+    <div class="container">
+        <div class="glass-panel">
+            <h1>Vibe Analysis</h1>
+            <p class="subtitle">Enter text to detect the energy ✨</p>
 
-        <textarea id="textInput" placeholder="How are you feeling today?"></textarea>
-        <button onclick="analyze()">Check Vibe</button>
+            <textarea id="textInput" placeholder="How are you feeling today?"></textarea>
+            <button onclick="analyze()">Check Vibe</button>
 
-        <div id="resultArea" class="result-container">
-            <div id="vibeDisplay" class="vibe-display"></div>
-            
-            <div class="metrics">
-                <div class="metric-card">
-                    <div class="metric-label">Polarity</div>
-                    <div id="polarityValue" class="metric-value">0.00</div>
+            <div id="resultArea" class="result-container">
+                <div id="vibeDisplay" class="vibe-display"></div>
+
+                <div class="metrics-grid">
+                    <div class="metric-row">
+                        <span>Positive</span>
+                        <div class="bar-container">
+                            <div id="posBar" class="bar fill-green"></div>
+                        </div>
+                        <span id="posValue">0%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Neutral</span>
+                        <div class="bar-container">
+                            <div id="neuBar" class="bar fill-gray"></div>
+                        </div>
+                        <span id="neuValue">0%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Negative</span>
+                        <div class="bar-container">
+                            <div id="negBar" class="bar fill-red"></div>
+                        </div>
+                        <span id="negValue">0%</span>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-label">Subjectivity</div>
-                    <div id="subjectivityValue" class="metric-value">0.00</div>
+
+                <div style="text-align: center; margin-top: 1.5rem; color: #64748b; font-size: 0.9rem;">
+                    Overall Score: <span id="compoundValue" style="color: white">0.00</span>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    async function analyze() {
-        const text = document.getElementById('textInput').value;
-        const btn = document.querySelector('button');
-        
-        if (!text.trim()) return;
-
-        // Loading state
-        const originalText = btn.innerText;
-        btn.innerText = "Scanning Vibes...";
-        btn.disabled = true;
-
-        try {
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text })
-            });
-            
-            const data = await response.json();
-            
-            // Update UI
-            const vibeDisplay = document.getElementById('vibeDisplay');
-            vibeDisplay.innerHTML = `<span class="${data.color}">${data.vibe}</span> ${data.emoji}`;
-            
-            document.getElementById('polarityValue').innerText = data.polarity;
-            document.getElementById('subjectivityValue').innerText = data.subjectivity;
-            
-            document.getElementById('resultArea').style.display = 'block';
-            
-        } catch (e) {
-            console.error(e);
-            alert("Something killed the vibe (Error connecting to API)");
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
+    <style>
+        .metrics-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
         }
-    }
-</script>
+
+        .metric-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .metric-row span:first-child {
+            width: 60px;
+            color: var(--text-muted);
+        }
+
+        .metric-row span:last-child {
+            width: 40px;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            width: 0%;
+            transition: width 1s ease-out;
+            border-radius: 4px;
+        }
+
+        .fill-green {
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .fill-gray {
+            background: #94a3af;
+        }
+
+        .fill-red {
+            background: #f87171;
+            box-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
+        }
+    </style>
+
+    <script>
+        async function analyze() {
+            const text = document.getElementById('textInput').value;
+            const btn = document.querySelector('button');
+
+            if (!text.trim()) return;
+
+            // Loading state
+            const originalText = btn.innerText;
+            btn.innerText = "Scanning Vibes...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+
+                // Update UI
+                const vibeDisplay = document.getElementById('vibeDisplay');
+                vibeDisplay.innerHTML = `<span class="${data.color}">${data.vibe}</span> ${data.emoji}`;
+
+                // Update Bars
+                document.getElementById('posBar').style.width = data.breakdown.pos + '%';
+                document.getElementById('neuBar').style.width = data.breakdown.neu + '%';
+                document.getElementById('negBar').style.width = data.breakdown.neg + '%';
+
+                document.getElementById('posValue').innerText = data.breakdown.pos + '%';
+                document.getElementById('neuValue').innerText = data.breakdown.neu + '%';
+                document.getElementById('negValue').innerText = data.breakdown.neg + '%';
+
+                document.getElementById('compoundValue').innerText = data.score;
+
+                document.getElementById('resultArea').style.display = 'block';
+
+            } catch (e) {
+                console.error(e);
+                alert("Something killed the vibe (Error connecting to API)");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
 
 </body>
+
 </html>
